@@ -1,6 +1,11 @@
-import os, sys, socket, struct, select, time, errno
-from socket import error as socket_error
-ICMP_ECHO_REQUEST = 8 # Seems to be the same on Solaris.
+import socket
+import os
+import sys
+import struct
+import time
+import select
+import binascii
+ICMP_ECHO_REQUEST = 8
  
  
 def checksum(source_string):
@@ -86,7 +91,7 @@ def do_one(dest_addr, timeout):
     return delay
  
  
-def verbose_ping(host, timeout = 1, count = 4):
+def ping(host, timeout = 1):
     dest = socket.gethostbyname(host)
     print ("")
     delay = do_one(dest, timeout)
@@ -97,8 +102,6 @@ def verbose_ping(host, timeout = 1, count = 4):
 
   
  
-if __name__ == '__main__':
-    #verbose_ping("google.com")
-    verbose_ping("yahoo.com")
-    #verbose_ping("spotify.com")
-    #verbose_ping("192.168.1.1")
+
+    ping("yahoo.com")
+ 

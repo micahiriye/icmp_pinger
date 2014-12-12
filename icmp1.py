@@ -1,15 +1,9 @@
 import os, sys, socket, struct, select, time, errno
 from socket import error as socket_error
- 
-# From /usr/include/linux/icmp.h; your milage may vary.
 ICMP_ECHO_REQUEST = 8 # Seems to be the same on Solaris.
  
  
 def checksum(source_string):
-    """
-    I'm not too confident that this is right but testing seems
-    to suggest that it gives the same answers as in_cksum in ping.c
-    """
     sum = 0
     countTo = (len(source_string)/2)*2
     count = 0
@@ -34,9 +28,6 @@ def checksum(source_string):
  
  
 def receive_one_ping(my_socket, ID, timeout):
-    """
-    receive the ping from the socket.
-    """
     timeLeft = timeout
     while True:
         startedSelect = time.time()
@@ -62,9 +53,6 @@ def receive_one_ping(my_socket, ID, timeout):
  
  
 def send_one_ping(my_socket, dest_addr, ID):
-    """
-    Send one ping to the given >dest_addr<.
-    """
     dest_addr  =  socket.gethostbyname(dest_addr)
  
     # Header is type (8), code (8), checksum (16), id (16), sequence (16)
@@ -88,24 +76,9 @@ def send_one_ping(my_socket, dest_addr, ID):
  
  
 def do_one(dest_addr, timeout):
-    """
-    Returns either the delay (in seconds) or none on timeout.
-    """
     icmp = socket.getprotobyname("icmp")
-    try:
-        my_socket = socket.socket(socket.AF_INET, socket.SOCK_RAW, icmp)
-    except socket_error as serr: #socket.error, (errno, msg):
-        if serr.errno == 1:
-            # Operation not permitted
-            msg = msg + (
-                " - Note that ICMP messages can only be sent from processes"
-                " running as root."
-            )
-            raise socket.error(msg)
-        raise # raise the original error
- 
+    my_socket = socket.socket(socket.AF_INET, socket.SOCK_RAW, icmp)
     my_ID = os.getpid() & 0xFFFF
- 
     send_one_ping(my_socket, dest_addr, my_ID)
     delay = receive_one_ping(my_socket, my_ID, timeout)
  
@@ -114,12 +87,8 @@ def do_one(dest_addr, timeout):
  
  
 def verbose_ping(host, timeout = 1, count = 4):
-   #timeout=1 means: If one second goes by without a reply from the server,
-    #the client assumes that either the clients ping or the servers pong is lost
     dest = socket.gethostbyname(host)
-    #print "Pinging " + dest + " using Python:"
     print ("")
-    #Send ping requests to a server separated by approximately one second
     delay = do_one(dest, timeout)
     print "destination: ", dest
     print (delay), "\n"
@@ -129,7 +98,7 @@ def verbose_ping(host, timeout = 1, count = 4):
   
  
 if __name__ == '__main__':
-    verbose_ping("google.com")
+    #verbose_ping("google.com")
     verbose_ping("yahoo.com")
-    verbose_ping("spotify.com")
-    verbose_ping("192.168.1.1")
+    #verbose_ping("spotify.com")
+    #verbose_ping("192.168.1.1")
